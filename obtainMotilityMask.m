@@ -33,6 +33,7 @@ nNumCols = info(1).Height;
 nNumRows = info(1).Width;
 im=imread(strcat(imPath,filesep,ims(1).name),'PixelRegion', {[1 resReduce nNumCols], [1 resReduce nNumRows]});
 
+
 % Initialize variables
 continueBool = 0;
 
