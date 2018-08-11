@@ -6,6 +6,19 @@ A set of Matlab functions for analyzing image velocimetry data on biological mot
 
 ## Setting up
 
+### 0.) MATLAB
+
+The functions make use of MATLAB's 
+
+- Image Processing Toolbox
+- Mapping Toolbox
+- Signal Processing Toolbox
+
+There's only one function (polyxpoly.m) called from the mapping toolbox, so if you don't have this you can probably find something equivalent that calculates the intersections of lines or polygons.
+
+There are three functions called from the Signal Processing toolbox (designfilt, filtfilt called by gutFreqWaveSpeedFinder.m and obtainMotilityParameters.m; xcorr.m called by obtainMotilityParameters.m). Again, if you don't have this, you can probably find something equivalent.
+
+
 ### 1.) Download PIVLab
 
 * Download PIVLab from [here](http://www.mathworks.com/matlabcentral/fileexchange/27659-pivlab-time-resolved-particle-image-velocimetry--piv--tool). Remember they have a [website](http://pivlab.blogspot.com) if you'd like documentation on anything.
