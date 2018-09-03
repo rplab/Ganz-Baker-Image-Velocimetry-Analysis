@@ -11,12 +11,13 @@ A set of Matlab functions for analyzing image velocimetry data on biological mot
 The functions make use of MATLAB's 
 
 - Image Processing Toolbox
-- Mapping Toolbox
 - Signal Processing Toolbox
 
-There's only one function (polyxpoly.m) called from the mapping toolbox, so if you don't have this you can probably find something equivalent that calculates the intersections of lines or polygons.
-
 There are three functions called from the Signal Processing toolbox (designfilt, filtfilt called by gutFreqWaveSpeedFinder.m and obtainMotilityParameters.m; xcorr.m called by obtainMotilityParameters.m). Again, if you don't have this, you can probably find something equivalent.
+
+- intersections.m
+
+In the original version of this program, there was one function (polyxpoly.m) required from the mapping toolbox; it called various sub-functions. We can now (Sept. 3, 2018) avoid this, downloading "intersections.m" (by Douglas Schwarz) from [here](https://www.mathworks.com/matlabcentral/fileexchange/11837-fast-and-robust-curve-intersections);  this should be put in the MATLAB path. 
 
 
 ### 1.) Download PIVLab

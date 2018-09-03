@@ -36,7 +36,13 @@
 %         - thetas: A 2xM array of slopes corresponding to the M columns.
 %             Each slope is calculated as the perpedicular to the 
 %             centerline.
+%
+% Modified Sept. 3, 2018: Raghuveer Parthasarathy
+  % Avoiding Mapping toolbox functions (polyxpoly.m), and using "intersections.m" from 
+  % https://www.mathworks.com/matlabcentral/fileexchange/11837-fast-and-robust-curve-intersections
+  % (Douglas Schwarz)
 
+    
 function [gutMesh, mSlopes, gutMeshVels, gutMeshVelsPCoords, thetas] = interpolatePIVVectorsInMask(curDir, expDir, imageType, resReduce, rawPIVOutputName, maskFileOutputName)
 
 %% Initialize variables
@@ -132,8 +138,17 @@ for i=1:NU
     x2Bottom=(y2-bBottom)/curOrthMBottom;
     
     % Find their intersection with the gut edge previously drawn
-    [exIntTop,whyIntTop]=polyxpoly([x1Top, x2Top],[y1, y2],fullPolyX,fullPolyY);
-    [exIntBottom,whyIntBottom]=polyxpoly([x1Bottom, x2Bottom],[y1, y2],fullPolyX,fullPolyY);
+    
+    % Using Mapping Toolbox Functions
+    % [exIntTop,whyIntTop]=polyxpoly([x1Top, x2Top],[y1, y2],fullPolyX,fullPolyY);
+    % [exIntBottom,whyIntBottom]=polyxpoly([x1Bottom, x2Bottom],[y1, y2],fullPolyX,fullPolyY);
+    
+    % Avoiding Mapping toolbox functions, and using "intersections.m" from 
+    % https://www.mathworks.com/matlabcentral/fileexchange/11837-fast-and-robust-curve-intersections
+    % (Douglas Schwarz)
+    [exIntTop,whyIntTop] = intersections([x1Top, x2Top],[y1, y2],fullPolyX,fullPolyY);
+    [exIntBottom,whyIntBottom]=intersections([x1Bottom, x2Bottom],[y1, y2],fullPolyX,fullPolyY);
+    
     % This looks complicated: Keep in mind the intersection gives two
     % points, so bottom/top may refer to which gut midline or it may refer
     % to which intersection is in question. Further obfuscated by images
