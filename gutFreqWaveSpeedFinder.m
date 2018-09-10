@@ -33,7 +33,8 @@
 %             shutting down by command later.
 
 % Ryan P. Baker
-% Last modified: Sept. 9, 2018 (Raghuveer Parthasarathy; minor change to display of Xcorr)
+% Modified: Sept. 9, 2018 (Raghuveer Parthasarathy; minor change to display of Xcorr)
+% Last modified: Sept. 10, 2018 (Raghuveer Parthasarathy; rounding of dTime, line 87)
 
 function [waveFrequency, waveSpeedSlope, BByFPS, sigB, waveFitRSquared, ...
     xCorrMaxima, analyzedDeltaMarkers, g] = ...
@@ -81,13 +82,13 @@ dMarker=(markerNumEndFreq-markerNumStartFreq);
 %dTime=2*floor(fps*timeAroundToSearchForMax); % Always even
 dTimeMin=round(min(slopeUser*(markerNumStartFreq:markerNumEndFreq)+interceptUser-timeAroundToSearchForMax));
 dTimeMax=round(max(slopeUser*(markerNumStartFreq:markerNumEndFreq)+interceptUser+timeAroundToSearchForMax));
-dTime=fps*(dTimeMax-dTimeMin);
+dTime=floor(fps*(dTimeMax-dTimeMin));
 % This next if statement is needed for my filter, minimum size of 27 (using literals here is not wise, I know)
 if(dTime*fps<27)
     addToDTimes = ceil((dTime*fps-27)/2);
     dTimeMin = dTimeMin - addToDTimes;
     dTimeMax = dTimeMax + addToDTimes;
-    disp('Warning: Time range extended to allow filter to work. See gutFreqWaveSpeedFinder line 40 for more info');
+    disp('Warning: Time range extended to allow filter to work. See gutFreqWaveSpeedFinder line 90 for more info');
 end
 reducedSmoothedVelocityMap=zeros(dMarker,dTime+1);
 typeOfFilt=designfilt('lowpassfir', 'PassbandFrequency', .15, ...
