@@ -50,7 +50,6 @@ if NSeconds*fps > numXCorrTimes
     fs = sprintf('   Showing all frames of XCorr (%.1f seconds)',  numXCorrTimes/fps);
     disp(fs);
 end
-size(trueXCorr)
 imshow(trueXCorr(framesOfFirstNSeconds,:),[], 'InitialMagnification','fit', ...
     'YData', [0, min([NSeconds, numXCorrTimes/fps])], 'Xdata', [1, size(trueXCorr,2)], ...
     'border', 'loose');
