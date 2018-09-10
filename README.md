@@ -93,7 +93,7 @@ This section will use the sample image set as an example. Feel free to follow al
 
 ### 8.) Define the first correlation peak
 
-* A set of images will pop up. The [top one (figure 2)](https://www.dropbox.com/s/qiarsnctl660yog/Begin%20XCorr.png?dl=0) (the cross-correlation curve) will let you click to draw a line again. [Draw a line](https://www.dropbox.com/s/rko8sn36kfvncdf/Define%20line.png?dl=0) along the first non-zero maximum. It doesn't need to be super accurate (the program will find the real maxima around the line you draw), the line you draw is simply helping the program distinguish **which** correlation peak out of the many you want to analyze.
+* A set of images will pop up. The [top one](https://www.dropbox.com/s/qiarsnctl660yog/Begin%20XCorr.png?dl=0) (the cross-correlation curve, with a window named "Cross-correlation") will let you click to draw a line again. [Draw a line](https://www.dropbox.com/s/rko8sn36kfvncdf/Define%20line.png?dl=0) along the first non-zero maximum. It doesn't need to be super accurate (the program will find the real maxima around the line you draw), the line you draw is simply helping the program distinguish **which** correlation peak out of the many you want to analyze.
 
 * After double clicking to end the drawing, a [prompt](https://www.dropbox.com/s/rko8sn36kfvncdf/Define%20line.png?dl=0) will ask three questions. You can normally skip the first (it is asking how many seconds plus or minus it should look in y). The second and third are asking for the start and end of the correlation maximum, respectively. As shown in the figure, I tend to choose x=1 for the starting x and an x for which there is still a very well defined peak in the correlation plot (in this case, that's x=15). 
 
@@ -108,3 +108,9 @@ This section will use the sample image set as an example. Feel free to follow al
 * In the [program screen](https://www.dropbox.com/s/v1yhk16up409sp7/Program.png?dl=0), click the "Collect Analysis" button (green text) to collect your data (you may now also revisit the buttons that were initially unavailable and do things like creating a movie with PIV vectors overlaying it).
 
 * This button does two things: It sends your data to the [Matlab workspace](https://www.dropbox.com/s/cgj74ary6tspr9f/Variables%20sent%20to%20workspace.png?dl=0) (if you prefer to work in Matlab) and it also saves a [.csv file in the main analysis directory](https://www.dropbox.com/s/m011h0copbfbolw/Variables%20set%20to%20csv.png?dl=0) if you prefer working with any other software (such as excel).
+
+* Output units: Frequencies are in units of 1/minutes. Fourier Transform Peaks, i.e. motility Amplitudes, are in units of microns. WaveSpeed slope: units of microns/second. (Assuming scales are correctly input into the GUI.) 
+
+### 10.) Known bugs / problems
+
+* The "Play Sound" button won't work, because playMotilityAsSound.m is missing. 

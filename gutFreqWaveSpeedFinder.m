@@ -32,13 +32,28 @@
 %         - g: A handle to the figure that is generated. Useful for
 %             shutting down by command later.
 
-function [waveFrequency, waveSpeedSlope, BByFPS, sigB, waveFitRSquared, xCorrMaxima, analyzedDeltaMarkers, g] = gutFreqWaveSpeedFinder( gutMesh, trueXCorr, fps, scale )
+% Ryan P. Baker
+% Last modified: Sept. 9, 2018 (Raghuveer Parthasarathy; minor change to display of Xcorr)
+
+function [waveFrequency, waveSpeedSlope, BByFPS, sigB, waveFitRSquared, ...
+    xCorrMaxima, analyzedDeltaMarkers, g] = ...
+    gutFreqWaveSpeedFinder( gutMesh, trueXCorr, fps, scale )
 
 % Find peristaltic frequency, wave speed from cross-correlation
-g = figure;
+g = figure('name', 'Cross-correlation');
 NSeconds=90;
-onlyShowFirstNSeconds=1:NSeconds*fps;
-imshow(trueXCorr(onlyShowFirstNSeconds,:),[], 'InitialMagnification','fit', 'YData', [0, NSeconds]);
+framesOfFirstNSeconds=1:NSeconds*fps;
+numXCorrTimes = size(trueXCorr,1);
+if NSeconds*fps > numXCorrTimes
+    framesOfFirstNSeconds = 1:numXCorrTimes;
+    fs = sprintf('Duration of images < %.1f seconds', NSeconds); disp(fs);
+    fs = sprintf('   Showing all frames of XCorr (%.1f seconds)',  numXCorrTimes/fps);
+    disp(fs);
+end
+size(trueXCorr)
+imshow(trueXCorr(framesOfFirstNSeconds,:),[], 'InitialMagnification','fit', ...
+    'YData', [0, min([NSeconds, numXCorrTimes/fps])], 'Xdata', [1, size(trueXCorr,2)], ...
+    'border', 'loose');
 set(gca,'YDir','normal')
 axis square;
 axis on;
