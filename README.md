@@ -114,3 +114,4 @@ This section will use the sample image set as an example. Feel free to follow al
 ### 10.) Known bugs / problems
 
 * The "Play Sound" button won't work, because playMotilityAsSound.m is missing. 
+* There may be errors or problems for movies smaller than 30 frames, due to hard-coded filter window sizes.
