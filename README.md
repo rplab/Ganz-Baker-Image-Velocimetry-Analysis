@@ -115,3 +115,4 @@ This section will use the sample image set as an example. Feel free to follow al
 
 * The "Play Sound" button won't work, because playMotilityAsSound.m is missing. 
 * There may be errors or problems for movies smaller than 30 frames, due to hard-coded filter window sizes.
+* There may be an error when using the new (2019) version of PIVLab. This is probably easy to fix, but we haven't looked into it yet. (RP, April 9, 2019.)
