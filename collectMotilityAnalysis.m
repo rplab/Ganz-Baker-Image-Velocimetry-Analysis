@@ -25,7 +25,6 @@ for i=1:nSubDirectories
     subFishDirect(i).name={subDire.name};
     nSFD=size(subFishDirect(i).name,2);
     curFolder = mainAnalysisDirectoryContents(i).name;
-    
     % Loop through all checked subdirectories to perform PIV
     for j=1:nSFD
         

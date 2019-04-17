@@ -70,9 +70,10 @@ interceptUser=rFEPoly(1,2)-slopeUser*rFEPoly(1,1);
 
 % Ask for which ranges of x and t the user wants to search rather than
 % using initialized variables, smoothing size
+last_x = min(size(trueXCorr(framesOfFirstNSeconds,:), 2), 39);
 xTDlgAns=inputdlg({'What range of time should be searched around (s)? +-', ...
     'What range of x should we use? First x is at marker number ', ...
-    'What range of x should we use? Last x is at marker number '}, 'Title',1,{'5','1','39'});
+    'What range of x should we use? Last x is at marker number '}, 'Title',1,{'5','1',num2str(last_x)});
 timeAroundToSearchForMax=str2double(xTDlgAns(1));
 markerNumStartFreq=str2double(xTDlgAns(2));
 markerNumEndFreq=str2double(xTDlgAns(3));

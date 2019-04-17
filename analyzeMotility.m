@@ -28,6 +28,11 @@
 %           spatial scale lockdown only after analysis is run)
 %        Import button for importing other completed analysis (e.g., PIV
 %           data; remember to lockdown template size)
+%
+% Ryan Baker
+% Before Feb. 11, 2018
+% Raghuveer Parthasarathy
+%   April 17, 2019: fixed fonts, linking to screen height.
 
 %% Main Function
 function analyzeMotility( varargin )
@@ -62,13 +67,14 @@ nAnalysisCheckboxTypes = 6;
 startGUI = [1, 1]; % X and Y location of the GUI corner (current units, default is pixels)
 screensize = get(groot, 'Screensize'); % Obtain current computer display dimensions
 widthGUI = screensize(3) - startGUI(1) - 1; % Define GUI width
-heightGUI = screensize(4) - startGUI(2) - 146; % Define GUI height (146 is an empirical number representing my system tray's height)
-GUISize = [startGUI(1), startGUI(2), widthGUI, heightGUI]; % Combine parameters for GUI location and dimensions
-panelBufferSpacing = 10; % How much spacing is between each panel of logic in the GUI
+heightOffset = 146; % 146 is an empirical number representing my system tray's height at the screen bottom
+heightGUI = screensize(4) - startGUI(2) - heightOffset; % Define GUI height 
+GUISize = [startGUI(1), startGUI(2)+round(heightOffset/2), widthGUI, heightGUI]; % Combine parameters for GUI location and dimensions
+panelBufferSpacing = round(10*heightGUI/900); % How much spacing is between each panel of logic in the GUI
 panelLineWidth = 1;
 panelBevelOffset = 2*panelLineWidth + 1;
-panelTitleTextSize = 20;
-panelTitleHeights = 28;
+panelTitleTextSize = round(20*heightGUI/900);
+panelTitleHeights = round(28*heightGUI/900);
 optionalScrollBarWidth = 100;
 experimentVariablesPanelWidthFraction = 0.26; % This variable will multiply 'widthGUI' to determine how wide the variables section of the GUI is; 0.22 seems to be good
 analysisPanelPosition = [panelBufferSpacing/widthGUI, panelBufferSpacing/heightGUI, experimentVariablesPanelWidthFraction - panelBufferSpacing/widthGUI, 1/2 - 2*panelBufferSpacing/heightGUI + panelTitleHeights/heightGUI];
@@ -82,12 +88,12 @@ widthSubGUI = processingPanelPosition(3)*widthGUI;
 heightSubGUI = processingPanelPosition(4)*heightGUI - processingTitlePosition(4);
 
 % Initialize GUI icon size/color variables
-textIconHeight = 18;
+textIconHeight = round(18*heightGUI/900);
 textBufferSpacing = 4;
-inputIconHeight = 5;
+inputIconHeight = round(5*heightGUI/900);
 answerFieldDropDownWidth = 80;
 answerFieldEditWidth = 70;
-textSize = 13;
+textSize = round(15*heightGUI/900);
 textFGColor = [0, 0, 0];
 
 % Initialize GUI Colors variables
@@ -420,7 +426,6 @@ function generateProcessingControlPanelListing
     % Initialize GUI variables
     loopIndex = 1;
     curLinearizedAnalysisIndex = 0;
-    textSize = 15;
     textIconHeight = 18;
     textBufferSpacing = 5; % How much spacing is between each line of text
     checkBoxSpacing = 25;
@@ -620,7 +625,7 @@ function generateProcessingControlPanelListing
         end
         
         % Create label for subfolder
-        textSizeModified = -4;
+        textSizeModified = -3;
         curLabelPosition = [(widthSubGUI + unshownWidth)/neededCols - panelBufferSpacing - (nAnalysisCheckboxTypes - i + 1)*checkBoxSpacing - 4, heightSubGUI - textIconHeight - panelBufferSpacing, 0, checkboxHeight];
         
         switch i
@@ -1112,12 +1117,12 @@ function generateAnalysisPanelListing
     buttonWidth = 100;
     buttonHeight = 30;
     %textBufferSpacing = 4;
-    fourierUpperBoundTextPosition = [analysisTitlePosition(1) + textBufferSpacing, analysisTitlePosition(2) - analysisTitlePosition(4) - panelBufferSpacing, widthGUI*experimentVariablesPanelWidthFraction - 3*textBufferSpacing - 2*panelBevelOffset - panelBufferSpacing - answerFieldEditWidth, 2*textIconHeight];
-    fourierUpperBoundInputPosition = fourierUpperBoundTextPosition + [fourierUpperBoundTextPosition(3) + textBufferSpacing, 0, answerFieldEditWidth - fourierUpperBoundTextPosition(3), - textIconHeight];
+    fourierUpperBoundTextPosition = [analysisTitlePosition(1) + textBufferSpacing, analysisTitlePosition(2) - analysisTitlePosition(4) - panelBufferSpacing, widthGUI*experimentVariablesPanelWidthFraction - 3*textBufferSpacing - 2*panelBevelOffset - panelBufferSpacing - answerFieldEditWidth, textIconHeight];
+    fourierUpperBoundInputPosition = fourierUpperBoundTextPosition + [fourierUpperBoundTextPosition(3) + textBufferSpacing, 0, answerFieldEditWidth - fourierUpperBoundTextPosition(3), 0];
     fourierLowerBoundTextPosition = fourierUpperBoundTextPosition + [0, - 2*textIconHeight - panelBufferSpacing, 0, 0];
-    fourierLowerBoundInputPosition = fourierLowerBoundTextPosition + [fourierLowerBoundTextPosition(3) + textBufferSpacing, 0, answerFieldEditWidth - fourierLowerBoundTextPosition(3), - textIconHeight];
+    fourierLowerBoundInputPosition = fourierLowerBoundTextPosition + [fourierLowerBoundTextPosition(3) + textBufferSpacing, 0, answerFieldEditWidth - fourierLowerBoundTextPosition(3), 0];
     VideoTimeTextPosition = fourierLowerBoundTextPosition + [0, - 2*textIconHeight - panelBufferSpacing, -fourierLowerBoundTextPosition(3)/4, 0];
-    VideoTimeFirstInputPosition = VideoTimeTextPosition + [VideoTimeTextPosition(3) + textBufferSpacing, 0, answerFieldEditWidth/3 - VideoTimeTextPosition(3) + fourierLowerBoundTextPosition(3)/12, - textIconHeight];
+    VideoTimeFirstInputPosition = VideoTimeTextPosition + [VideoTimeTextPosition(3) + textBufferSpacing, 0, answerFieldEditWidth/3 - VideoTimeTextPosition(3) + fourierLowerBoundTextPosition(3)/12, 0];
     VideoXTextPosition = VideoTimeTextPosition + [0, - 2*textIconHeight - panelBufferSpacing, 0, 0];
     VideoXFirstInputPosition = VideoTimeFirstInputPosition + [0, - 2*textIconHeight - panelBufferSpacing, 0, 0];
     closeButtonPosition = [widthGUI*experimentVariablesPanelWidthFraction - panelBevelOffset - textBufferSpacing- buttonWidth, panelBufferSpacing + panelBevelOffset, buttonWidth, buttonHeight];
@@ -1127,7 +1132,7 @@ function generateAnalysisPanelListing
     % Fourier upper bound text
     uicontrol('Parent',f,...
         'Style','text',...
-        'String','Frequency upper bound on FFT (units min^-1)?',...
+        'String','FFT Frequency upper bound (min^-1)?',...
         'BackgroundColor',panelColor,...
         'ForegroundColor',textFGColor,...
         'Position',fourierUpperBoundTextPosition,...
@@ -1148,7 +1153,7 @@ function generateAnalysisPanelListing
     % Fourier lower bound text
     uicontrol('Parent',f,...
         'Style','text',...
-        'String','Frequency lower bound on FFT (units min^-1)?',...
+        'String','FFT Frequency lower bound (min^-1)?',...
         'BackgroundColor',panelColor,...
         'ForegroundColor',textFGColor,...
         'Position',fourierLowerBoundTextPosition,...
