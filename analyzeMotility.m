@@ -33,6 +33,7 @@
 % Before Feb. 11, 2018
 % Raghuveer Parthasarathy
 %   April 17, 2019: fixed fonts, linking to screen height.
+%   April 22, 2019: minor change to font size (line 97).
 
 %% Main Function
 function analyzeMotility( varargin )
@@ -93,7 +94,7 @@ textBufferSpacing = 4;
 inputIconHeight = round(5*heightGUI/900);
 answerFieldDropDownWidth = 80;
 answerFieldEditWidth = 70;
-textSize = round(15*heightGUI/900);
+textSize = round(11*heightGUI/900);
 textFGColor = [0, 0, 0];
 
 % Initialize GUI Colors variables
