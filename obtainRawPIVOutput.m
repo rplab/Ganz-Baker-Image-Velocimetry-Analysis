@@ -9,6 +9,8 @@
 %               -settings{2}- Step size/window size of template
 %               -settings{5}- Resolution reduction linear factor
 
+% Modified to add progress bar: Raghuveer Parthasarathy, April 26, 2019
+
 function [p, s, x, y, u, v, typevector, imageDirectory, filenames, u_filt, v_filt, typevector_filt] = obtainRawPIVOutput(imageDirectory, settings)
 
 %% Create list of images inside specified directory
@@ -96,6 +98,8 @@ v=x;
 typevector=x; %typevector will be 1 for regular vectors, 0 for masked areas
 counter=0;
 
+progtitle = 'PIV analysis';
+progbar = waitbar(0, progtitle);
 for i=1:nF - 1
     counter=counter+1;
     if(strcmp(suffix, '*.tif'))
@@ -108,9 +112,11 @@ for i=1:nF - 1
     image1 = PIVlab_preproc (image1,p{1,2},p{2,2},p{3,2},p{4,2},p{5,2},p{6,2},p{7,2},p{8,2}); %preprocess images
     image2 = PIVlab_preproc (image2,p{1,2},p{2,2},p{3,2},p{4,2},p{5,2},p{6,2},p{7,2},p{8,2});
     [x{counter}, y{counter}, u{counter}, v{counter}, typevector{counter}] = piv_FFTmulti (image1,image2,s{1,2},s{2,2},s{3,2},s{4,2},s{5,2},s{6,2},s{7,2},s{8,2},s{9,2},s{10,2});
-    clc
-    disp([int2str((i)/(nF - 1)*100) ' %']);
+    if mod(i,10)==0
+        waitbar(i/nF, progbar, progtitle)
+    end    
 end
+close(progbar)
 
 %% PIV postprocessing loop
 % Settings

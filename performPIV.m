@@ -48,7 +48,7 @@ for i=1:nDirectories
     
     % Loop through all checked subdirectories to perform PIV
     for j=1:nSubDirectories
-        
+        fprintf('   Folder %d of %d; subFolder %d of %d\n', i, nDirectories, j, nSubDirectories);
         % If we want to analyze it, do so, else skip
         if(analysisToPerform(i).bools(j,1) && analysisToPerform(i).bools(j,6))
             
