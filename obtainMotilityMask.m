@@ -45,7 +45,9 @@ while (continueBool ~= 1)
     % Draw the boundary and gut center. Try to draw the centerline in a way
     % you'd want orthogonal vectors to orient themselves
     figure;
-    imH = imshow(histeq(im), []);
+    % Adjust contrast in various ways
+    imH = imshow(log(double(im)+1), []);
+    %imH = imshow(histeq(im), []);
     %imC = imcontrast(imH);
     gutOutline = impoly;
     gutOutlinePoly = getPosition(gutOutline);
