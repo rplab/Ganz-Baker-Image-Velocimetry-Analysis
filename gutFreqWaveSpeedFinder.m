@@ -122,10 +122,11 @@ nCoefficients = length(LPFilt.Coefficients); % number of coefficients in the fil
 % If the number of timepoints is not > 3*nCoefficents, filtering will not
 % work. Adjust dTimeMax
 if (dTime*fps + 1) < 3*nCoefficients
-    disp('gutFreqWaveSpeedFinder: Insufficient range of timepoints.')
-    dTimeMax = 3*nCoefficients/fps + 1;
+    fprintf('gutFreqWaveSpeedFinder: Insufficient timepoints. dTime*fps = %.1f; nCoefficients = %d\n', ...
+        dTime*fps, nCoefficients)
+    dTimeMax = (3*nCoefficients+1)/fps + dTimeMin;
     if dTimeMax*fps > size(trueXCorr,1)
-        errordlg('gutFreqWaveSpeedFinder: insufficient timepoints for filter.')
+        errordlg('gutFreqWaveSpeedFinder: insufficient timepoints for filter; can''t extend.')
     end
     dTime=floor(dTimeMax-dTimeMin);
     fprintf('   Extending dTimeMax; now: %.1f\n', dTimeMax);
