@@ -1,15 +1,14 @@
 % Function which shows an image of the cross correlation, prompts the user
 % for a line showing the program roughly where first set of correlation
-% maxima are, and then processes that subset of the data to extract wave
-% speed, frequency, variation, etc.
+% maxima are, and then processes that subset of the data (filtering) 
+% to extract wave speed, frequency, variation, etc.
 %
 % Inputs:- gutMesh: A NxM array of vertex locations for a grid morphed to 
 %             fit inside of the mask. The slopes for each column of 
 %             vertices is given by thetas.
 %        - trueXCorr: The cross-correlation surface generated elsewhere,
 %             with flips taken into account.
-%        - fps: Frames per second of the movie being analyzed. In units
-%             of...
+%        - fps: Frames per second of the movie being analyzed. 
 %        - scale: The reduced scale of the images
 %          (resolution*resolutionReduction), in units of microns/pixel.
 %
@@ -32,9 +31,17 @@
 %         - g: A handle to the figure that is generated. Useful for
 %             shutting down by command later.
 
+% To do:
+%    -- Make "NSeconds" not be hard-coded to 90. Use all the timepoints, 
+%       or have this be a more transparent parameter somewhere. [RP Sept 17, 2022]
+%    -- .
+%
 % Ryan P. Baker
 % Modified: Sept. 9, 2018 (Raghuveer Parthasarathy; minor change to display of Xcorr)
-% Last modified: Sept. 10, 2018 (Raghuveer Parthasarathy; rounding of dTime, line 87)
+% Modified: Sept. 17, 2022 (Raghuveer Parthasarathy; rounding of dTime, line 90)
+%           Modify filter settings to not be so crudely hardcoded.
+%           Check that filter creation doesn't give an error; expand if needed.
+% Last modified: Sept. 17, 2022
 
 function [waveFrequency, waveSpeedSlope, BByFPS, sigB, waveFitRSquared, ...
     xCorrMaxima, analyzedDeltaMarkers, g] = ...
@@ -47,13 +54,14 @@ framesOfFirstNSeconds=1:NSeconds*fps;
 numXCorrTimes = size(trueXCorr,1);
 if NSeconds*fps > numXCorrTimes
     framesOfFirstNSeconds = 1:numXCorrTimes;
-    fs = sprintf('Duration of images < %.1f seconds', NSeconds); disp(fs);
-    fs = sprintf('   Showing all frames of XCorr (%.1f seconds)',  numXCorrTimes/fps);
-    disp(fs);
+    fprintf('Duration of images < %.1f seconds\n', NSeconds); 
+    fprintf('   Showing all frames of XCorr (%.1f seconds)\n',  numXCorrTimes/fps);
 end
 imshow(trueXCorr(framesOfFirstNSeconds,:),[], 'InitialMagnification','fit', ...
     'YData', [0, min([NSeconds, numXCorrTimes/fps])], 'Xdata', [1, size(trueXCorr,2)], ...
     'border', 'loose');
+ylabel('Corr. Time (s)')
+xlabel('Corr X (marker)')
 set(gca,'YDir','normal')
 axis square;
 axis on;
@@ -83,23 +91,51 @@ dMarker=(markerNumEndFreq-markerNumStartFreq);
 %dTime=2*floor(fps*timeAroundToSearchForMax); % Always even
 dTimeMin=round(min(slopeUser*(markerNumStartFreq:markerNumEndFreq)+interceptUser-timeAroundToSearchForMax));
 dTimeMax=round(max(slopeUser*(markerNumStartFreq:markerNumEndFreq)+interceptUser+timeAroundToSearchForMax));
-dTime=floor(fps*(dTimeMax-dTimeMin));
+% Check that dTimeMin is positive (and at least 1/fps)
+
 % This next if statement is needed for my filter, minimum size of 27 (using literals here is not wise, I know)
+dTime=floor(dTimeMax-dTimeMin);
 if(dTime*fps<27)
     addToDTimes = ceil((dTime*fps-27)/2);
     dTimeMin = dTimeMin - addToDTimes;
     dTimeMax = dTimeMax + addToDTimes;
-    disp('Warning: Time range extended to allow filter to work. See gutFreqWaveSpeedFinder line 90 for more info');
+    disp('Warning: Time range extended to allow filter to work. See gutFreqWaveSpeedFinder line 95 for more info');
 end
-reducedSmoothedVelocityMap=zeros(dMarker,dTime+1);
-typeOfFilt=designfilt('lowpassfir', 'PassbandFrequency', .15, ...
-        'StopbandFrequency', .65, 'PassbandRipple', 1, ...
+
+if dTimeMin < 1/fps
+    fprintf('gutFreqWaveSpeedFinder: dTimeMin is negative or too small (%.1f). Force 1/fps.\n', dTimeMin)
+    dTimeMinOffset = 1/fps - dTimeMin;
+    dTimeMin = 1/fps;
+    dTimeMax = dTimeMax + dTimeMinOffset;
+    fprintf('Also offset dTimeMax: now %0.1f.\n', dTimeMax)
+end
+dTime=floor(dTimeMax-dTimeMin);
+
+% Make 'PassbandFrequency',  and 'StopbandFrequency' depend on fps. Note
+% that values of 0.15 and 0.65 seem fine for 5 fps, so scale by this; max 1
+% (normalized frequency)
+LPFilt=designfilt('lowpassfir', 'PassbandFrequency', min(0.15*5/fps, 1.0), ...
+        'StopbandFrequency', min(0.65*5/fps, 1.0), 'PassbandRipple', 1, ...
         'StopbandAttenuation', 60);
-    
+nCoefficients = length(LPFilt.Coefficients); % number of coefficients in the filter
+
+% If the number of timepoints is not > 3*nCoefficents, filtering will not
+% work. Adjust dTimeMax
+if (dTime*fps + 1) < 3*nCoefficients
+    disp('gutFreqWaveSpeedFinder: Insufficient range of timepoints.')
+    dTimeMax = 3*nCoefficients/fps + 1;
+    if dTimeMax*fps > size(trueXCorr,1)
+        errordlg('gutFreqWaveSpeedFinder: insufficient timepoints for filter.')
+    end
+    dTime=floor(dTimeMax-dTimeMin);
+    fprintf('   Extending dTimeMax; now: %.1f\n', dTimeMax);
+end
+
+reducedSmoothedVelocityMap=zeros(dMarker,dTime+1);
 for i=markerNumStartFreq:markerNumEndFreq
     %tAroundToSearch=round(fps*(slopeUser*i+interceptUser));
     subsetTrueXCorr=squeeze(trueXCorr(fps*dTimeMin:fps*dTimeMax,i));
-    reducedSmoothedVelocityMap(i,:)=filtfilt(typeOfFilt,subsetTrueXCorr);
+    reducedSmoothedVelocityMap(i,:)=filtfilt(LPFilt,subsetTrueXCorr);
 end
 
 % Find maxima
