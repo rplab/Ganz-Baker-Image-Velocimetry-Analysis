@@ -41,7 +41,7 @@
 % Modified: Sept. 17, 2022 (Raghuveer Parthasarathy; rounding of dTime, line 90)
 %           Modify filter settings to not be so crudely hardcoded.
 %           Check that filter creation doesn't give an error; expand if needed.
-% Last modified: Sept. 17, 2022
+% Last modified: Sept. 27, 2022
 
 function [waveFrequency, waveSpeedSlope, BByFPS, sigB, waveFitRSquared, ...
     xCorrMaxima, analyzedDeltaMarkers, g] = ...
@@ -132,10 +132,11 @@ if (dTime*fps + 1) < 3*nCoefficients
     fprintf('   Extending dTimeMax; now: %.1f\n', dTimeMax);
 end
 
-reducedSmoothedVelocityMap=zeros(dMarker,dTime+1);
+subsetXCorrFrames = round(fps*dTimeMin):round(fps*dTimeMax);
+reducedSmoothedVelocityMap=zeros(dMarker,length(subsetXCorrFrames));
 for i=markerNumStartFreq:markerNumEndFreq
     %tAroundToSearch=round(fps*(slopeUser*i+interceptUser));
-    subsetTrueXCorr=squeeze(trueXCorr(fps*dTimeMin:fps*dTimeMax,i));
+    subsetTrueXCorr=squeeze(trueXCorr(subsetXCorrFrames,i));
     reducedSmoothedVelocityMap(i,:)=filtfilt(LPFilt,subsetTrueXCorr);
 end
 
