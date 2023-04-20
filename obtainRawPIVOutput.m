@@ -10,6 +10,9 @@
 %               -settings{5}- Resolution reduction linear factor
 
 % Modified to add progress bar: Raghuveer Parthasarathy, April 26, 2019
+% Modified to fix image2 loading the same image as image1 for image
+%    sequences (not multipage TIFFs)! --  Raghuveer Parthasarathy, April 
+%    19, 2023
 
 function [p, s, x, y, u, v, typevector, imageDirectory, filenames, u_filt, v_filt, typevector_filt] = obtainRawPIVOutput(imageDirectory, settings)
 
@@ -58,7 +61,7 @@ else
 end
 
 % Image properties
-nF=size(filenames,2);
+nF=size(filenames,2); % number of files (sequence) OR number of frames (stack)
 info = imfinfo([imageDirectory filesep baseFilenames{1}]);
 numCols = info(1).Height;
 numRows = info(1).Width;
@@ -104,10 +107,10 @@ for i=1:nF - 1
     counter=counter+1;
     if(strcmp(suffix, '*.tif'))
         image1=imread(fullfile(filenames{i}.name), 'Index', filenames{i}.index,'PixelRegion', {[1 resReduce numCols], [1 resReduce numRows]}); % read images
-        image2=imread(fullfile(filenames{i}.name), 'Index', filenames{i + 1}.index,'PixelRegion', {[1 resReduce numCols], [1 resReduce numRows]}); % read images
+        image2=imread(fullfile(filenames{i+1}.name), 'Index', filenames{i + 1}.index,'PixelRegion', {[1 resReduce numCols], [1 resReduce numRows]}); % read images
     else
         image1=imread(fullfile(filenames{i}.name), 'PixelRegion', {[1 resReduce numCols], [1 resReduce numRows]}); % read images
-        image2=imread(fullfile(filenames{i}.name), 'PixelRegion', {[1 resReduce numCols], [1 resReduce numRows]}); % read images
+        image2=imread(fullfile(filenames{i+1}.name), 'PixelRegion', {[1 resReduce numCols], [1 resReduce numRows]}); % read images
     end
     image1 = PIVlab_preproc (image1,p{1,2},p{2,2},p{3,2},p{4,2},p{5,2},p{6,2},p{7,2},p{8,2}); %preprocess images
     image2 = PIVlab_preproc (image2,p{1,2},p{2,2},p{3,2},p{4,2},p{5,2},p{6,2},p{7,2},p{8,2});
