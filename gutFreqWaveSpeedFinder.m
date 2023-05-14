@@ -41,7 +41,9 @@
 % Modified: Sept. 17, 2022 (Raghuveer Parthasarathy; rounding of dTime, line 90)
 %           Modify filter settings to not be so crudely hardcoded.
 %           Check that filter creation doesn't give an error; expand if needed.
-% Last modified: Sept. 27, 2022
+% Modified May 13, 2023 (Raghuveer Parthasarathy; avoid filtering in time if
+%           there aren't enough datapoints)
+% Last modified: May 13, 2023
 
 function [waveFrequency, waveSpeedSlope, BByFPS, sigB, waveFitRSquared, ...
     xCorrMaxima, analyzedDeltaMarkers, g] = ...
@@ -86,12 +88,38 @@ timeAroundToSearchForMax=str2double(xTDlgAns(1));
 markerNumStartFreq=str2double(xTDlgAns(2));
 markerNumEndFreq=str2double(xTDlgAns(3));
 
-% Perform zero-phase digital filter to data
+% Perform zero-phase digital filtering on the data
+
+% Filter properties
+% Make 'PassbandFrequency',  and 'StopbandFrequency' depend on fps. Note
+% that values of 0.15 and 0.65 seem fine for 5 fps, so scale by this; max 
+% (normalized frequency) = 0.8 for passband frequency, 1.0 for stop
+LPFilt=designfilt('lowpassfir', 'PassbandFrequency', min(0.15*5/fps, 0.8), ...
+        'StopbandFrequency', min(0.65*5/fps, 1.0), 'PassbandRipple', 1, ...
+        'StopbandAttenuation', 60);
+nCoefficients = length(LPFilt.Coefficients); % number of coefficients in the filter
+
+% There are a lot of ways that the filtering can fail (insufficient
+% temporal sampling). Things that work for 5 minute movies at 5 fps were
+% hard-coded by Ryan Baker, and it's difficult to see how these relate to
+% the filter design
+% I'll include various checks, but also an inelegant avoidance of filtering
+% in certain cases
+
+performFiltering = true;
+
 dMarker=(markerNumEndFreq-markerNumStartFreq);
-%dTime=2*floor(fps*timeAroundToSearchForMax); % Always even
 dTimeMin=round(min(slopeUser*(markerNumStartFreq:markerNumEndFreq)+interceptUser-timeAroundToSearchForMax));
 dTimeMax=round(max(slopeUser*(markerNumStartFreq:markerNumEndFreq)+interceptUser+timeAroundToSearchForMax));
+
 % Check that dTimeMin is positive (and at least 1/fps)
+if dTimeMin < 1/fps
+    fprintf('gutFreqWaveSpeedFinder: dTimeMin is negative or too small (%.1f). Force 1/fps.\n', dTimeMin)
+    dTimeMinOffset = 1/fps - dTimeMin;
+    dTimeMin = 1/fps;
+    dTimeMax = dTimeMax + dTimeMinOffset;
+    fprintf('Also offset dTimeMax: now %0.1f.\n', dTimeMax)
+end
 
 % This next if statement is needed for my filter, minimum size of 27 (using literals here is not wise, I know)
 dTime=floor(dTimeMax-dTimeMin);
@@ -100,24 +128,11 @@ if(dTime*fps<27)
     dTimeMin = dTimeMin - addToDTimes;
     dTimeMax = dTimeMax + addToDTimes;
     disp('Warning: Time range extended to allow filter to work. See gutFreqWaveSpeedFinder line 95 for more info');
+    if dTimeMax*fps > size(trueXCorr,1)
+        fprintf('Extending dTimeMax to %.2f exceeds size of trueXCorr (%d); not filtering.\n', dTimeMax, size(trueXCorr,1));
+        performFiltering = false;
+    end
 end
-
-if dTimeMin < 1/fps
-    fprintf('gutFreqWaveSpeedFinder: dTimeMin is negative or too small (%.1f). Force 1/fps.\n', dTimeMin)
-    dTimeMinOffset = 1/fps - dTimeMin;
-    dTimeMin = 1/fps;
-    dTimeMax = dTimeMax + dTimeMinOffset;
-    fprintf('Also offset dTimeMax: now %0.1f.\n', dTimeMax)
-end
-dTime=floor(dTimeMax-dTimeMin);
-
-% Make 'PassbandFrequency',  and 'StopbandFrequency' depend on fps. Note
-% that values of 0.15 and 0.65 seem fine for 5 fps, so scale by this; max 1
-% (normalized frequency)
-LPFilt=designfilt('lowpassfir', 'PassbandFrequency', min(0.15*5/fps, 1.0), ...
-        'StopbandFrequency', min(0.65*5/fps, 1.0), 'PassbandRipple', 1, ...
-        'StopbandAttenuation', 60);
-nCoefficients = length(LPFilt.Coefficients); % number of coefficients in the filter
 
 % If the number of timepoints is not > 3*nCoefficents, filtering will not
 % work. Adjust dTimeMax
@@ -127,23 +142,32 @@ if (dTime*fps + 1) < 3*nCoefficients
     dTimeMax = (3*nCoefficients+1)/fps + dTimeMin;
     if dTimeMax*fps > size(trueXCorr,1)
         errordlg('gutFreqWaveSpeedFinder: insufficient timepoints for filter; can''t extend.')
+        performFiltering = false;
     end
-    dTime=floor(dTimeMax-dTimeMin);
     fprintf('   Extending dTimeMax; now: %.1f\n', dTimeMax);
 end
 
-subsetXCorrFrames = round(fps*dTimeMin):round(fps*dTimeMax);
-reducedSmoothedVelocityMap=zeros(dMarker,length(subsetXCorrFrames));
-for i=markerNumStartFreq:markerNumEndFreq
-    %tAroundToSearch=round(fps*(slopeUser*i+interceptUser));
-    subsetTrueXCorr=squeeze(trueXCorr(subsetXCorrFrames,i));
-    reducedSmoothedVelocityMap(i,:)=filtfilt(LPFilt,subsetTrueXCorr);
+if performFiltering
+    subsetXCorrFrames = round(fps*dTimeMin):round(fps*dTimeMax);
+    reducedSmoothedVelocityMap=zeros(dMarker,length(subsetXCorrFrames));
+    for i=markerNumStartFreq:markerNumEndFreq % each spatial position
+        %tAroundToSearch=round(fps*(slopeUser*i+interceptUser));
+        subsetTrueXCorr=squeeze(trueXCorr(subsetXCorrFrames,i));
+        reducedSmoothedVelocityMap(i,:)=filtfilt(LPFilt,subsetTrueXCorr);
+    end
+    reducedVelocityMap = reducedSmoothedVelocityMap;
+else
+    % unfiltered correlation map, subset of spatial positions.
+    reducedVelocityMap = (trueXCorr(:, markerNumStartFreq:markerNumEndFreq))';
 end
 
+
 % Find maxima
-[~, xCorrMaxima]=max(reducedSmoothedVelocityMap,[],2); % Name is misleading, should be xCorrMaximaTimes I think?
+[~, xCorrMaxima]=max(reducedVelocityMap,[],2); % Name is misleading, should be xCorrMaximaTimes I think?
 xes = markerNumStartFreq:markerNumEndFreq;
-[A, ~, B, sigB, waveFitRSquared, ~, ~] = fitline( xes, xCorrMaxima' );
+
+[A, ~, B, sigB, waveFitRSquared, ~, ~] = fitline( xes, xCorrMaxima' ); 
+
 waveFrequency=60/((A-1)/fps+dTimeMin); % Units of per minutes, -1 for indexing A at 1
 waveSpeedSlope=fps*translateMarkerNumToMicron/B; % Units of um/sec ((frames/sec)*(micron/marker)/(frames/marker))
 BByFPS = B/fps;

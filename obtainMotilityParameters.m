@@ -45,7 +45,13 @@
 %         - waveAverageWidth: A number representing what we now call
 %             Duration. In units of seconds.
 
-function [fftPowerPeak, fftPeakFreq, fftRPowerPeakSTD, fftRPowerPeakMin, fftRPowerPeakMax, waveFrequency, waveSpeedSlope, BByFPS, sigB, waveFitRSquared, xCorrMaxima, analyzedDeltaMarkers, waveAverageWidth] = obtainMotilityParameters(curDir, analysisVariables, interpolationOutputName, GUISize)
+% Last modified May 13, 2023 -- Raghuveer Parthasarathy. Edits to check
+%    array sizes
+
+function [fftPowerPeak, fftPeakFreq, fftRPowerPeakSTD, fftRPowerPeakMin, ...
+    fftRPowerPeakMax, waveFrequency, waveSpeedSlope, BByFPS, sigB, waveFitRSquared, ...
+    xCorrMaxima, analyzedDeltaMarkers, waveAverageWidth] = ...
+    obtainMotilityParameters(curDir, analysisVariables, interpolationOutputName, GUISize)
 
 %% Option to change the color scales of the QSTMaps and cross-correlation plots
 iWantToUseMyOwnScale = false; % If this is true, use the options below to specify what values to scale your plots to.
@@ -73,7 +79,8 @@ totalTimeFraction=1; % Use 1 if all
 fractionOfTimeStart=size(gutMeshVelsPCoords,4); % Use size(gutMeshVelsPCoords,4) if all
 markerNumStart=1;
 markerNumEnd=size(gutMesh,2); % Use size(gutMesh,2) if all
-pulseWidthLargestDecayTime=50; % Units of frames... I feel that's easier
+pulseWidthLargestDecayTime = min(50, size(gutMeshVelsPCoords, 4)); % Units of frames... I feel that's easier
+    % was 50; change to allow more temporally sparse movies (RP 13May2023)
 widthGUI = GUISize(3);
 heightGUI = GUISize(4);
 convertAmplitudeToUmUnits = 2*scale/size(gutMeshVelsPCoords, 4);
@@ -229,6 +236,9 @@ f = fps/2*linspace(0,1,NFFT/2+1); % Units of per second
 % Create a subset of the FFT
 subsetFFTBeginningF = floor(2*(NFFT/2+1)/(fps*largestPeriodToSeeInFFT));
 subsetFFTEndingF = floor(2*(NFFT/2+1)/(fps*minPeriodToSeeInFFT));
+if subsetFFTEndingF > length(f)
+    subsetFFTEndingF = length(f); % for sparse series; RP 13 May 2023
+end
 subsetF = [f(subsetFFTBeginningF), f(subsetFFTEndingF)];
 % subsetSingleFFT=singleFFTRPGMV(1:subsetFFTEndingF);
 subsetFullFFT = fftRootPowerGMV(:,subsetFFTBeginningF:subsetFFTEndingF);
