@@ -38,9 +38,11 @@
 %             centerline.
 %
 % Modified Sept. 3, 2018: Raghuveer Parthasarathy
-  % Avoiding Mapping toolbox functions (polyxpoly.m), and using "intersections.m" from 
-  % https://www.mathworks.com/matlabcentral/fileexchange/11837-fast-and-robust-curve-intersections
-  % (Douglas Schwarz)
+%    Avoiding Mapping toolbox functions (polyxpoly.m), and using "intersections.m" from 
+%    https://www.mathworks.com/matlabcentral/fileexchange/11837-fast-and-robust-curve-intersections
+%    (Douglas Schwarz)
+% Modified July 9, 2023: Raghuveer Parthasarathy
+
 
     
 function [gutMesh, mSlopes, gutMeshVels, gutMeshVelsPCoords, thetas] = interpolatePIVVectorsInMask(curDir, expDir, imageType, resReduce, rawPIVOutputName, maskFileOutputName)
@@ -66,7 +68,6 @@ NUDist(NUDist>0)=1;
 NU=sum(NUDist); % "Raw" NU, but I want it nicer
 NUrem=idivide(uint8(NU),10);
 NU=double((NUrem+1)*10); % Just because I want an even, divisible by 10, NV
-
 % Initialize the gutMesh variables (the variables containing spatial info)
 finalExesTop=zeros(1,NU+1);
 finalExesBottom=zeros(1,NU+1);
@@ -98,12 +99,12 @@ curvezTop=ppval(csTop,exesTop);
 curvezBottom=ppval(csBottom,exesBottom);
 STotalTop=sum(sqrt(dExTop^2+diff(curvezTop).^2)); % Obtain the total length of the curve drawn
 STotalBottom=sum(sqrt(dExBottom^2+diff(curvezBottom).^2)); % Obtain the total length of the curve drawn
-dSTop=STotalTop/NU; % Arc length of N subdivisions
-dSBottom=STotalBottom/NU; % Arc length of N subdivisions
+dSTop=STotalTop/NU; % Arc length of each of N subdivisions
+dSBottom=STotalBottom/NU; % Arc length of each of N subdivisions
 partialSSumTop=cumsum(sqrt(dExTop^2+diff(curvezTop).^2)); % Partial sum of arcs
 partialSSumBottom=cumsum(sqrt(dExBottom^2+diff(curvezBottom).^2)); % Partial sum of arcs
-secSNumTop=uint32(floor(partialSSumTop/dSTop)); % Evenly number exes by arc length
-secSNumBottom=uint32(floor(partialSSumBottom/dSBottom)); % Evenly number exes by arc length
+secSNumTop=uint32(round(partialSSumTop/dSTop)); % Evenly number exes by arc length
+secSNumBottom=uint32(round(partialSSumBottom/dSBottom)); % Evenly number exes by arc length
 for i=1:NU+1
     tempsNTop=find(secSNumTop==i-1);
     tempsNBottom=find(secSNumBottom==i-1);
