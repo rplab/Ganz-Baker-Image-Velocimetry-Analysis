@@ -34,6 +34,7 @@
 % Raghuveer Parthasarathy
 %   April 17, 2019: fixed fonts, linking to screen height.
 %   April 22, 2019: minor change to font size (line 97).
+%   July 12, 2023: Delete play sound button.
 
 %% Main Function
 function analyzeMotility( varargin )
@@ -444,7 +445,6 @@ function generateProcessingControlPanelListing
     playVideoButtonWidth = 55;
     openAnalysisButtonWidth = 80;
     playPIVVideoButtonWidth = 55;
-    playPIVSoundButtonWidth = 60;
     loadVarsButtonWidth = 90;
     %g = uipanel('Parent',procPanel);
     
@@ -566,23 +566,12 @@ function generateProcessingControlPanelListing
                 set(buttonHandleArray(loopIndex, 3), 'Enable', 'off');
             end
             
-            % Create play sound button
-            buttonHandleArray(loopIndex, 4) = uicontrol('Parent',subProcPanel,...
-                'Style','togglebutton',...
-                'String','Play Sound',...
-                'Position',[curPosition(1) + subSubFolderWidth + textBufferSpacing, curPosition(2) - (textIconHeight + textBufferSpacing), playPIVSoundButtonWidth, textIconHeight],...
-                'Callback',{@playPIVSoundButton_Callback, i, j});
-            if( currentAnalysisPerformed(i).bools(j, 4) )
-                set(buttonHandleArray(loopIndex, 4), 'Enable', 'on');
-            else
-                set(buttonHandleArray(loopIndex, 4), 'Enable', 'off');
-            end
-            
+          
             % Create load into workspace button
             buttonHandleArray(loopIndex, 5) = uicontrol('Parent',subProcPanel,...
                 'Style','pushbutton',...
                 'String','Vars->Workspace',...
-                'Position',[curPosition(1) + subSubFolderWidth + 2*textBufferSpacing + playPIVSoundButtonWidth, curPosition(2) - (textIconHeight + textBufferSpacing), loadVarsButtonWidth, textIconHeight],...
+                'Position',[curPosition(1) + subSubFolderWidth + textBufferSpacing, curPosition(2) - (textIconHeight + textBufferSpacing), loadVarsButtonWidth, textIconHeight],...
                 'Callback',{@loadVarsButton_Callback, i, j});
             if( currentAnalysisPerformed(i).bools(j, 4) )
                 set(buttonHandleArray(loopIndex, 5), 'Enable', 'on');
@@ -869,50 +858,6 @@ function generateProcessingControlPanelListing
             
             % Reopen this program
             analyzeMotility(mainExperimentDirectory, mainAnalysisDirectory);
-            
-        end
-        
-    end
-    
-    function playPIVSoundButton_Callback(hObject, ~, ii, jj)
-        
-        % Get button state
-        isToggleDown = get(hObject, 'Value');
-        set(hObject, 'String', 'Loading...');
-        pause(0.1);
-        
-        % Define the current folder
-        curDir = strcat(mainAnalysisDirectory, filesep, mainExperimentDirectoryContents(ii).name, filesep, mainExperimentSubDirectoryContentsCell{1, ii}(jj).name);
-
-        if(logical(isToggleDown))
-            
-            % Load data
-            gutMeshVelsPCoordsStruct = load(strcat(curDir, filesep, 'processedPIVOutput_Current.mat'),'gutMeshVelsPCoords');
-            gutMeshVelsPCoords = gutMeshVelsPCoordsStruct.gutMeshVelsPCoords;
-            
-            % Play sound if toggle was pressed down, stop if released
-            totalTimeFraction = 1;
-            fractionOfTimeStart = size(gutMeshVelsPCoords,4);
-            markerNumStart = 1;
-            markerNumEnd = size(gutMeshVelsPCoords,2);
-            samplingRate = 44100;
-            
-            % Transform into sound with position mapped onto frequency
-            theSound = playMotilityAsSound(gutMeshVelsPCoords, totalTimeFraction, fractionOfTimeStart, markerNumStart, markerNumEnd);
-            
-            % Set string
-            set(hObject, 'String', 'Stop Sound');
-            
-            % Play the sound
-            sound(theSound,samplingRate)
-            
-        else
-            
-            % Stop the sound
-            clear sound
-            
-            % Set string
-            set(hObject, 'String', 'Play Sound');
             
         end
         
