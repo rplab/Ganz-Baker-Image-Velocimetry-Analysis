@@ -93,7 +93,7 @@ This section will use the sample image set as an example. Feel free to follow al
 
 ### 8.) Define the first correlation peak
 
-* A set of images will pop up. The [top one](https://www.dropbox.com/s/qiarsnctl660yog/Begin%20XCorr.png?dl=0) (the cross-correlation curve, with a window named "Cross-correlation") will let you click to draw a line again. [Draw a line](https://www.dropbox.com/s/rko8sn36kfvncdf/Define%20line.png?dl=0) along the first non-zero maximum. It doesn't need to be super accurate (the program will find the real maxima around the line you draw), the line you draw is simply helping the program distinguish **which** correlation peak out of the many you want to analyze.
+* A set of images will pop up. The [top one](https://www.dropbox.com/s/qiarsnctl660yog/Begin%20XCorr.png?dl=0) (the cross-correlation curve, with a window named "Cross-correlation") will show two choices: the cross-correlation, and the cross-correlation with the median at each time-point subtracted (which removes position-independent motion). In the dialog box, pick which curve to use to find peaks. Then, you'll get a window with only this cross-correlation visualization. [Draw a line](https://www.dropbox.com/s/rko8sn36kfvncdf/Define%20line.png?dl=0), clicking two points along the first non-zero maximum. It doesn't need to be very accurate (the program will find the real maxima around the line you draw); the line you draw is simply helping the program distinguish **which** correlation peak out of the many you want to analyze.
 
 * After double clicking to end the drawing, a [prompt](https://www.dropbox.com/s/rko8sn36kfvncdf/Define%20line.png?dl=0) will ask three questions. You can normally skip the first (it is asking how many seconds plus or minus it should look in y). The second and third are asking for the start and end of the correlation maximum, respectively. As shown in the figure, I tend to choose x=1 for the starting x and an x for which there is still a very well defined peak in the correlation plot (in this case, that's x=15). 
 
@@ -113,6 +113,4 @@ This section will use the sample image set as an example. Feel free to follow al
 
 ### 10.) Known bugs / problems
 
-* The "Play Sound" button won't work, because playMotilityAsSound.m is missing. 
-* There may be errors or problems for movies smaller than 30 frames, due to hard-coded filter window sizes.
-* There may be an error when using the new (2019) version of PIVLab. This is probably easy to fix, but we haven't looked into it yet. (RP, April 9, 2019.)
+* There may be an error when using the 2019 version of PIVLab. This is probably easy to fix, but we haven't looked into it yet. (RP, April 9, 2019.)
