@@ -3,7 +3,8 @@
 % function to fit a 1D Gaussian using Maximum-Likelihood
 % Estimation (MLE):  z(x) = A*exp(-((x-x0)^2)/2/sigma^2) + offset;
 % Fits to a Gaussian with a constant (background) offset and
-% *Poisson-distributed* noise.
+% *Poisson-distributed* noise. (May fail if z is negative, which wouldn't 
+% occur for image data)
 %
 % Checks if fit center is outside of the range; if so, output x0=centroid.
 % (MLE can give nonsensical results, esp. at low signal/noise)
@@ -29,7 +30,7 @@
 % August 3, 2017; based on gaussfit2DMLE.m
 % October 24, 2021: major fix to optimization function, mistakenly included 
 %    the sum that was used in 2D and not applicable in 1D
-% Last modified July 12, 2023
+% Last modified July 12, 2023 (comments added Aug 26, 2023)
 
 function [A, x0, sigma, offset] = gaussfit1DMLE(z, tolz, params0, px)
 
@@ -57,9 +58,9 @@ fminoptions.LargeScale = 'off';  % use the medium-scale algorithm,
    
 % Add an offset, to avoid the chance of small numbers causing problems for
 % the estimator function (only makes a difference for small signal/noise,
-% less than about 6.)
+% less than about 6.) Use -min(z) + 0.1 (seems find for images w/ integer vales)
 zoff = 0.1;  % Does choice of zoff matter?
-z = z+zoff;
+z = z + zoff;
 params0(1) = params0(1) + zoff;
 
 params = fminunc(@(P) objfun(P,px,z),params0,fminoptions);
@@ -72,14 +73,7 @@ offset = params(1) - zoff;
 % Check if particle center is outside of image; return simple centroid if so
 if (x0<min(px)) || (x0>max(px)) 
     x0 = sum(z.*px, 'all')/sum(z(:));
-    % disp(px)
-    % disp(z)
-    % disp(z.*px)
-    % disp(sum(z.*px))
-    % figure; plot(px, z, 'kx-')
-    % disp(x0)
-    % disp('here 1')
-    % disp('gaussfit1DMLE out of bounds: returning (x0) = centroid!')
+
 end
 
 end

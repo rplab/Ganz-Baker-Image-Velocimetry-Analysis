@@ -122,7 +122,8 @@ for j=1:(markerNumEndX - markerNumStartX + 1)
     minFrame = round(centerFrame - timeAroundToSearchForMax*fps);
     maxFrame = round(centerFrame + timeAroundToSearchForMax*fps);
     xCorr_to_fit = xCorrIm(minFrame:maxFrame, markerNumStartX + j - 1);
-    [~, x0, ~, ~] = gaussfit1DMLE(xCorr_to_fit);
+    % Add offset to fit; we only care about the center
+    [~, x0, ~, ~] = gaussfit1DMLE(xCorr_to_fit - min(xCorr_to_fit(:)) + 0.1);
     xCorrMaxima(j) = x0 + minFrame - 1; % frame at which XCorr is max. at this position j
 
 end
