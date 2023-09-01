@@ -41,10 +41,12 @@
 %    Avoiding Mapping toolbox functions (polyxpoly.m), and using "intersections.m" from 
 %    https://www.mathworks.com/matlabcentral/fileexchange/11837-fast-and-robust-curve-intersections
 %    (Douglas Schwarz)
-% Modified July 9, 2023: Raghuveer Parthasarathy
+% modified Sept. 1, 2023: Raghuveer Parthasarathy
+%    Make compatible with most recent (2021) version of PIVlab, rather than
+%    2018 version. Change: turn four single-precision variables into double
+% Last modified Sept. 1, 2023: Raghuveer Parthasarathy
 
 
-    
 function [gutMesh, mSlopes, gutMeshVels, gutMeshVelsPCoords, thetas] = interpolatePIVVectorsInMask(curDir, expDir, imageType, resReduce, rawPIVOutputName, maskFileOutputName)
 
 %% Initialize variables
@@ -55,7 +57,7 @@ splineNFineness=10000;
 load(strcat(curDir, filesep, rawPIVOutputName,'_Current.mat'));
 load(strcat(curDir, filesep, maskFileOutputName, '_Current.mat'));
 ex=x{1}; %#ok as it should be loaded, represents the x positions of the gutMesh
-why=y{1}; %#ok as it should be loaded, represents the x positions of the gutMesh
+why=y{1}; %#ok as it should be loaded, represents the y positions of the gutMesh
 
 % Define NU and NV, the number of points anterior/posterior along the gut
 % and the number of points dorsal/ventral to the gut
@@ -215,6 +217,13 @@ for i=1:nT
     why=y{i};
     V=v_filt{i};
     U=u_filt{i};
+
+    % For 2021 version of PIVlab
+    ex = double(ex);
+    why = double(why);
+    U = double(U);
+    V = double(V);
+
     SIU=scatteredInterpolant(ex(:),why(:),U(:));
     SIV=scatteredInterpolant(ex(:),why(:),V(:));
     mU=SIU(Xq(:),Yq(:));

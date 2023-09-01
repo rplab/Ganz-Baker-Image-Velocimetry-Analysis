@@ -13,6 +13,10 @@
 % Modified to fix image2 loading the same image as image1 for image
 %    sequences (not multipage TIFFs)! --  Raghuveer Parthasarathy, April 
 %    19, 2023
+% modified Sept. 1, 2023: Raghuveer Parthasarathy
+%    Make compatible with most recent (2021) version of PIVlab, rather than
+%    2018 version. Change: Additional inputs for preproc; see s{12-16}
+% Last modified Sept. 1, 2023: Raghuveer Parthasarathy
 
 function [p, s, x, y, u, v, typevector, imageDirectory, filenames, u_filt, v_filt, typevector_filt] = obtainRawPIVOutput(imageDirectory, settings)
 
@@ -79,6 +83,14 @@ s{7,1}= 'Int. area 2';           s{7,2}=2*templateSize;         % second pass wi
 s{8,1}= 'Int. area 3';           s{8,2}=templateSize;         % third pass window size
 s{9,1}= 'Int. area 4';           s{9,2}=templateSize;         % fourth pass window size
 s{10,1}='Window deformation';    s{10,2}='*linear'; % '*spline' is more accurate, but slower
+% Settings for 2021 version
+s{11,1}='repeat';                s{11,2} = 0; % repeat last pass, I think
+s{12,1}='mask_auto';             s{12,2} = 0; % mask the autocorrelation 
+s{13,1}='do_linear_correlation'; s{13,2} = false; % not sure what this is 
+s{14,1}='do_correlation_matrices';  s{14,2} = false; % output correlation matrices
+s{15,1}='repeat_last_pass';      s{15,2} = 0; % repeat the last pass
+s{16,1}='delta_diff_min';        s{16,2} = 0.025; % min allowed change (default from PIVlab)
+
 
 %% Standard image preprocessing settings
 p = cell(8,1);
@@ -103,18 +115,32 @@ counter=0;
 
 progtitle = 'PIV analysis';
 progbar = waitbar(0, progtitle);
+image2 = [];
 for i=1:nF - 1
     counter=counter+1;
     if(strcmp(suffix, '*.tif'))
-        image1=imread(fullfile(filenames{i}.name), 'Index', filenames{i}.index,'PixelRegion', {[1 resReduce numCols], [1 resReduce numRows]}); % read images
+        if i==1
+            image1=imread(fullfile(filenames{i}.name), 'Index', filenames{i}.index,'PixelRegion', {[1 resReduce numCols], [1 resReduce numRows]}); % read images
+        else
+            image1 = image2;
+        end
         image2=imread(fullfile(filenames{i+1}.name), 'Index', filenames{i + 1}.index,'PixelRegion', {[1 resReduce numCols], [1 resReduce numRows]}); % read images
     else
-        image1=imread(fullfile(filenames{i}.name), 'PixelRegion', {[1 resReduce numCols], [1 resReduce numRows]}); % read images
+        if i==1
+            image1=imread(fullfile(filenames{i}.name), 'PixelRegion', {[1 resReduce numCols], [1 resReduce numRows]}); % read images
+        else
+            image1 = image2;
+        end
         image2=imread(fullfile(filenames{i+1}.name), 'PixelRegion', {[1 resReduce numCols], [1 resReduce numRows]}); % read images
     end
-    image1 = PIVlab_preproc (image1,p{1,2},p{2,2},p{3,2},p{4,2},p{5,2},p{6,2},p{7,2},p{8,2}); %preprocess images
-    image2 = PIVlab_preproc (image2,p{1,2},p{2,2},p{3,2},p{4,2},p{5,2},p{6,2},p{7,2},p{8,2});
-    [x{counter}, y{counter}, u{counter}, v{counter}, typevector{counter}] = piv_FFTmulti (image1,image2,s{1,2},s{2,2},s{3,2},s{4,2},s{5,2},s{6,2},s{7,2},s{8,2},s{9,2},s{10,2});
+    % 2018 version:
+    %image1 = PIVlab_preproc (image1,p{1,2},p{2,2},p{3,2},p{4,2},p{5,2},p{6,2},p{7,2},p{8,2}); %preprocess images
+    %image2 = PIVlab_preproc (image2,p{1,2},p{2,2},p{3,2},p{4,2},p{5,2},p{6,2},p{7,2},p{8,2});
+    image1 = PIVlab_preproc (image1,p{1,2},p{2,2},p{3,2},p{4,2},p{5,2},p{6,2},p{7,2},p{8,2}, 0, 1); %preprocess images
+    image2 = PIVlab_preproc (image2,p{1,2},p{2,2},p{3,2},p{4,2},p{5,2},p{6,2},p{7,2},p{8,2}, 0, 1);
+    % 2018 version:
+    %[x{counter}, y{counter}, u{counter}, v{counter}, typevector{counter}] = piv_FFTmulti (image1,image2,s{1,2},s{2,2},s{3,2},s{4,2},s{5,2},s{6,2},s{7,2},s{8,2},s{9,2},s{10,2});
+    [x{counter}, y{counter}, u{counter}, v{counter}, typevector{counter}] = piv_FFTmulti (image1,image2,s{1,2},s{2,2},s{3,2},s{4,2},s{5,2},s{6,2},s{7,2},s{8,2},s{9,2},s{10,2}, s{11,2}, s{12,2}, s{13,2}, s{14,2}, s{15,2}, s{16,2});
     if mod(i,10)==0
         waitbar(i/nF, progbar, progtitle)
     end    
