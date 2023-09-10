@@ -35,6 +35,7 @@
 %   April 17, 2019: fixed fonts, linking to screen height.
 %   April 22, 2019: minor change to font size (line 97).
 %   July 12, 2023: Delete play sound button.
+%   September 9, 2023: Made scroll bar larger
 
 %% Main Function
 function analyzeMotility( varargin )
@@ -85,7 +86,7 @@ variablesPanelPosition = [analysisPanelPosition(1), analysisPanelPosition(2) + a
 variablesTitlePosition = [variablesPanelPosition(1)*widthGUI + panelBevelOffset, variablesPanelPosition(2)*heightGUI + variablesPanelPosition(4)*heightGUI - panelTitleHeights - panelBevelOffset + 2, variablesPanelPosition(3)*widthGUI - 2*panelBevelOffset + 2, panelTitleHeights];
 processingPanelPosition = [analysisPanelPosition(1) + experimentVariablesPanelWidthFraction, analysisPanelPosition(2), (1 - experimentVariablesPanelWidthFraction) - 2*panelBufferSpacing/widthGUI, 1 - 2*panelBufferSpacing/heightGUI];
 processingTitlePosition = [processingPanelPosition(1)*widthGUI + panelBevelOffset, processingPanelPosition(2)*heightGUI + processingPanelPosition(4)*heightGUI - panelTitleHeights - panelBevelOffset + 2, processingPanelPosition(3)*widthGUI - 2*panelBevelOffset + 2, panelTitleHeights];
-optionalScrollBarPosition = [widthGUI - 2*panelBufferSpacing - optionalScrollBarWidth, processingTitlePosition(2) + 2*panelTitleHeights/3, optionalScrollBarWidth, 1];
+optionalScrollBarPosition = [widthGUI - 2*panelBufferSpacing - optionalScrollBarWidth, processingTitlePosition(2) + 2*panelTitleHeights/3, optionalScrollBarWidth, 4];
 widthSubGUI = processingPanelPosition(3)*widthGUI;
 heightSubGUI = processingPanelPosition(4)*heightGUI - processingTitlePosition(4);
 

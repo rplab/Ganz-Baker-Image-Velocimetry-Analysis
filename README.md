@@ -63,6 +63,8 @@ This section will use the sample image set as an example. Feel free to follow al
 
 ### 5.) Click "[Analyze Selection](https://www.dropbox.com/s/v1yhk16up409sp7/Program.png?dl=0)" (red text)
 
+* The "Image Processing Control Panel" will show an entry for each directory name (each fish). If there are more than 18, these extend to the right side of the screen -- there's a  small gray scroll bar at the top right, in the black "Image Processing Control Panel" text box.
+
 * Set the variables in the upper left "Variable Panel." These cannot be changed once the analysis has started.
 
 * Click the "Analyze Selection" button to begin analysis on everything with a checkmark ([red text](https://www.dropbox.com/s/v1yhk16up409sp7/Program.png?dl=0)).
