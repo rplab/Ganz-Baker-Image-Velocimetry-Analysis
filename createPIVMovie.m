@@ -1,14 +1,29 @@
-% Function which...
+% Function that superimposes velocity vectors from PIV onto source image frames,
+% creating a PIV movie
+%
+% Ryan Baker
+%
+% Last modified: Oct. 10, 2023 -- Raghuveer Parthasarathy
+%    - Avoid histogram equalization (optional)
+%    - Change arrow color
+%    - Change arrow size scaling factor
+%    - The above are implemented as hard-coded parameters. (Not ideal, but
+%      easy...)
 %
 % To do:
+%    - Make a version of this that avoids the GUI
 
 function createPIVMovie(curAnDir, curExpDir, analysisVariables, PIVVideoParams, PIVOutputName, interpolationOutputName)
 
+quiverColor = [0.9 0.6 0.3]; % For Quiver
+velMultiple = 20; % multiply velocity by this for quiver length; formerly 5
+do_histEq = false; % if true apply histogram equalization to the images.
+
 % % Load data and images from directory, define variables
 suffix = analysisVariables{1};
-templateSize = str2double(analysisVariables{2});
-fps = str2double(analysisVariables{3});
-origMicronsPerPixel = str2double(analysisVariables{4});
+%templateSize = str2double(analysisVariables{2});
+%fps = str2double(analysisVariables{3});
+%origMicronsPerPixel = str2double(analysisVariables{4});
 origResReduction = str2double(analysisVariables{5});
 load(strcat(curAnDir,filesep,interpolationOutputName,'_Current.mat')); % Assumes file has gutMesh, gutMeshVels, gutMeshVelsPCoords, thetas
 startTP = PIVVideoParams(1,1)/100;
@@ -26,7 +41,6 @@ amount = length(baseFilenames);
 count=1; % Linear index that travels through all multipages monotonically
 filenames = {};
 writerObj = VideoWriter(strcat(curAnDir,filesep,PIVOutputName),'Uncompressed AVI');
-velMultiple=5;
 showOnlyHorizontalComponent = true;
 
 % Progress bar
@@ -82,22 +96,30 @@ startingFrame = round(nF*startTP + 1);
 endingFrame = round(nF*endTP);
 startingPosition = round(numCols*startX + 1);
 endingPosition = round(numCols*endX);
-firstImHistExample = histeq(imread(fullfile(filenames{1}.name), 'Index', filenames{1}.index,'PixelRegion', {[1 resReduce numRows], [startingPosition resReduce endingPosition]})); % read images
-maxI = double(max(firstImHistExample(:)));
-minI = double(min(firstImHistExample(:)));
+
+if do_histEq
+    firstImHistExample = histeq(imread(fullfile(filenames{1}.name), 'Index', filenames{1}.index,'PixelRegion', {[1 resReduce numRows], [startingPosition resReduce endingPosition]})); % read images
+    maxI = double(max(firstImHistExample(:)));
+    minI = double(min(firstImHistExample(:)));
+end
 
 % Open video writing code, initialize settings
 open(writerObj);
 figure;
 set(gcf,'Renderer','zbuffer');
-totalFrames = ceil((endingFrame - startingFrame + 1)/deltaF);
+% totalFrames = ceil((endingFrame - startingFrame + 1)/deltaF);
 
 for i=startingFrame:deltaF:endingFrame - 1
     
     % Get image
     %imageIndex = (i - startingFrame + deltaF)/deltaF - (i~=1); % The logical subtraction is because gutMeshVels and others only have N - 1 frames from differencing; just make the first frame the same as the second
     curImage = imread(fullfile(filenames{i}.name), 'Index', filenames{i}.index, 'PixelRegion', {[1 resReduce numRows], [startingPosition resReduce endingPosition]});
-    im = (double(imhistmatch(curImage,firstImHistExample)) - minI)/(maxI - minI); % read images, histEQ them
+    if do_histEq
+        im = (double(imhistmatch(curImage,firstImHistExample)) - minI)/(maxI - minI); % read images, histEQ them
+    else
+        % no equalization
+        im = double(curImage);
+    end
    
     % Get full vector field for quiver plot
     curIndex = i - (i~=1); % The logical subtraction is because gutMeshVels and others only have N - 1 frames from differencing; just make the first frame the same as the second
@@ -129,7 +151,7 @@ for i=startingFrame:deltaF:endingFrame - 1
     
     imshow(im,[]);
     hold on;
-    quiver(qx,qy,qu,qv,0,'Color','r','LineWidth',2);
+    quiver(qx,qy,qu,qv,0,'Color', quiverColor,'LineWidth',2);
     %quiver(qx,qy,qupx,qupy,0,'b');
     %quiver(qx,qy,qvpx,qvpy,0,'b');
     hold off;
