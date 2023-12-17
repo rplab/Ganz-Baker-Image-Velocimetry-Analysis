@@ -320,7 +320,6 @@ while(retryBool)
             retryBool = false;
         end
     end
-    keyboard
 end
 if(goodData~=1)
     
