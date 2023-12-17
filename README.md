@@ -113,9 +113,7 @@ This section will use the sample image set as an example. Feel free to follow al
 
 * Output units: Frequencies are in units of 1/minutes. "FFT Power Peak" (i.e. Fourier Transform Peaks, i.e. gut motility amplitudes), are in units of microns/second. WaveSpeed slope: units of microns/second. (Assuming scales are correctly input into the GUI.) 
 
-* A comment about the contraction amplitude: The “FFT Power Peak” (p) is simply what it is: the amplitude of the Fourier Transform of the image velocities at the primary frequency. Its magnitude depends on the speed (vc) and the spatial extent (A) of the contractions in a non-trivial way. From simulations and analysis, p would be equal if the waves were sinusoidal, but instead is roughly vc tc/(T/2), where T is the oscillation period – i.e. vc times the fraction of the period occupied by the oscillation. Therefore p ≈ 2 vc tc/T = 2 A / T, and we can estimate A as p T / 2. (Note: frequency is reported as 1/min, so be sure to convert this to 1/seconds.)  [RP, 17 Dec. 2023]
-
- amplitude (A), 
+* A comment about the contraction amplitude: The “FFT Power Peak” (p) is simply what it is: the amplitude of the Fourier Transform of the image velocities at the primary frequency. Its magnitude depends on the speed (vc) and the spatial extent (A) of the contractions in a non-trivial way. From simulations and analysis, p would be equal if the waves were sinusoidal, but instead is roughly vc tc/(T/2), where T is the oscillation period – i.e. vc times the fraction of the period occupied by the oscillation. Therefore p ≈ 2 vc tc/T = 2 A / T, and we can estimate A as p T / 2. (Note: frequency (f) is reported as 1/min, so be sure to convert this to 1/seconds, i.e. T = 60/f.)  [RP, 17 Dec. 2023]
 
 
 ### 10.) Known bugs / problems
