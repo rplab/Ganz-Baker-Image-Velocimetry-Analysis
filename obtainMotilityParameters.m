@@ -45,8 +45,8 @@
 %         - waveAverageWidth: A number representing what we now call
 %             Duration. In units of seconds.
 
-% Last modified May 13, 2023 -- Raghuveer Parthasarathy. Edits to check
-%    array sizes
+% Last modified Dec. 17, 2023 by Raghuveer Parthasarathy. Multiply
+%    convertAmplitudeToUmUnits by fps so units are um/second
 
 function [fftPowerPeak, fftPeakFreq, fftRPowerPeakSTD, fftRPowerPeakMin, ...
     fftRPowerPeakMax, waveFrequency, waveSpeedSlope, BByFPS, sigB, waveFitRSquared, ...
@@ -64,7 +64,7 @@ xCorrMax = .1; % See above
 loadedInterpFile = load(strcat(curDir, filesep, interpolationOutputName,'_Current.mat'));
 
 % Initialize variables
-scale = str2double(analysisVariables{4})*str2double(analysisVariables{5});
+scale = str2double(analysisVariables{4})*str2double(analysisVariables{5});  % Note that this is the scale of the rescaled image
 fps = str2double(analysisVariables{3});
 retryBool = true;
 maxFreqToSeeInFFT = str2double(analysisVariables{6});
@@ -83,7 +83,8 @@ pulseWidthLargestDecayTime = min(50, size(gutMeshVelsPCoords, 4)); % Units of fr
     % was 50; change to allow more temporally sparse movies (RP 13May2023)
 widthGUI = GUISize(3);
 heightGUI = GUISize(4);
-convertAmplitudeToUmUnits = 2*scale/size(gutMeshVelsPCoords, 4);
+
+convertAmplitudeToUmUnits = 2*scale/size(gutMeshVelsPCoords, 4)*fps;  % microns/second
 if(iWantToUseMyOwnScale)
     QSTMapScale = [QSTMapMin, QSTMapMax];
 else
@@ -278,7 +279,7 @@ xlabel('x (\mum)','FontSize',20);
 set(findall(transH,'type','axes'),'fontsize',15,'fontWeight','bold');
 saveas(transH, strcat(curDir, filesep, 'TransFig_',date), 'png');
 
-%% Funzies Transverse
+%% Transverse velocities
 
 % surfaceValuesT=squeeze(-mean(gutMeshVelsPCoords(:,:,2,:),1));
 % figure; plot(surfaceValuesT(21,1:300));
@@ -319,6 +320,7 @@ while(retryBool)
             retryBool = false;
         end
     end
+    keyboard
 end
 if(goodData~=1)
     
@@ -356,7 +358,7 @@ fftRPowerPeakMax = fftRPowerPeakMax*convertAmplitudeToUmUnits;
 % Save the figure as both a png (with date) and as a .fig (only most recent
 % since the file sizes may be large)
 set(findall(h,'type','axes'),'fontsize',15,'fontWeight','bold');
-saveas(h, strcat(curDir, filesep, 'Figures_',date), 'png')
+saveas(h, strcat(curDir, filesep, 'Figures_', date), 'png')
 saveas(h, strcat(curDir, filesep, 'Figures_Current'), 'fig');
 
 close(h);
