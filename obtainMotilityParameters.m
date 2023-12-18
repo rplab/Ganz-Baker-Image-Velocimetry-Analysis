@@ -14,18 +14,18 @@
 %        - GUISize: A 1x2 vector containing the width and height of the
 %            figure window which will contain the analyzed images.
 %
-% Outputs:- fftPowerPeak: A number representing what we now call Amplitude.
-%             In units of microns.
-%         - fftPeakFreq: A number representing what we now call Frequency.
-%             In units of per minutes. Obtained from the FFT.
+% Outputs:- fftPowerPeak: FFT amplitude at the peak frequency.
+%             In units of microns/second.
+%         - fftPeakFreq: Contraction Frequency, from the FFT. Units: per
+%                        minute
 %         - fftRPowerPeakSTD: The standard deviation of the amplitudes when
-%             considered along the gut. In units of microns.
+%             considered along the gut. In units of microns/second.
 %         - fftRPowerPeakMin: The minimum amplitude along the gut. In units
-%             of microns.
+%             of microns/second.
 %         - fftRPowerPeakMax: The maximum amplitude along the gut. In units
-%             of microns.
-%         - waveFrequency: A number representing what we now call Frequency.
-%             Obtained from the XCorr. This number should be similar to,
+%             of microns/second.
+%         - waveFrequency: wave Frequency, obtained from the XCorr. 
+% %           This number should be similar to,
 %             though likely not identical to, fftPeakFreq. In units of per
 %             minutes.
 %         - waveSpeedSlope: A number representing the slope of the
@@ -44,7 +44,7 @@
 %             cross-correlation maxima.
 %         - waveAverageWidth: A number representing what we now call
 %             Duration. In units of seconds.
-
+%
 % Last modified Dec. 17, 2023 by Raghuveer Parthasarathy. Multiply
 %    convertAmplitudeToUmUnits by fps so units are um/second
 
@@ -308,7 +308,7 @@ while(retryBool)
     fftRPowerPeakMin=min(fftRootPowerGMV(:,actualMaxPosition));
     fftRPowerPeakMax=max(fftRootPowerGMV(:,actualMaxPosition));
     
-    fitInfo = sprintf('\nWave Period (s) = %.2f \nWave Period  from FFT (s) = %.2f \nSlope (s/marker) = %.2f \n Wave Fit R-Squared = %.4f \n Wave Speed Variation = %.2f \n FFT Peak Power, i.e. Amplitude (um) = %.2f',...
+    fitInfo = sprintf('\nWave Period (s) = %.2f \nWave Period  from FFT (s) = %.2f \nSlope (s/marker) = %.2f \n Wave Fit R-Squared = %.4f \n Wave Speed Variation = %.2f \n FFT Peak Amplitude (um/sec) = %.2f',...
         60/waveFrequency, 1/fftPeakFreq, BByFPS, waveFitRSquared, sigB, convertAmplitudeToUmUnits*fftPowerPeak);
     retryPrompt = menu(strcat('Does everything look good (figures will be saved after this)?',fitInfo),'Yes','No');
     if(retryPrompt==1)
