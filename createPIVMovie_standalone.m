@@ -28,6 +28,7 @@
 %     do_histEq: default false; if true, apply histogram equalization to the images.
 %     velMultiple : multiply velocity by this for quiver length; formerly
 %                    5; new default 20.
+%     quiverColor : arrow color; default [0.9 0.6 0.3] (orange)
 %
 % Outputs
 %    None.
@@ -44,11 +45,11 @@
 %    - Make a version of this that avoids the GUI
 %
 % Oct. 10, 2023 -- Raghuveer Parthasarathy
-% Last modified: Oct. 10, 2023 -- Raghuveer Parthasarathy
+% Last modified: Dec. 21 2023 (add quiverColor input) -- Raghuveer Parthasarathy
 
 function createPIVMovie_standalone(imagePath, analysisParamsPath, ...
     analysisParamsFile, PIVoutputFilePath, PIVoutputFile, PIVVideoParams, ...
-    PIVOutputName, do_histEq, velMultiple)
+    PIVOutputName, do_histEq, velMultiple, quiverColor)
 
 if ~exist('imagePath', 'var') || isempty(imagePath)
     imagePath = uigetdir([], 'Folder containing images');
@@ -77,10 +78,11 @@ end
 if ~exist('velMultiple', 'var') || isempty(velMultiple)
     velMultiple = 20;
 end
+if ~exist('quiverColor', 'var') || isempty(quiverColor)
+    quiverColor = [0.9 0.6 0.3]; % For Quiver
+end
 
 load(strcat(analysisParamsPath,filesep,analysisParamsFile), 'analysisVariables');
-
-quiverColor = [0.9 0.6 0.3]; % For Quiver
 
 % % Load data and images from directory, define variables
 suffix = analysisVariables{1};
